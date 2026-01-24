@@ -41,7 +41,7 @@
   "bugs": {
     "url": "https://github.com/f12io/coco/issues"
   },
-  "license": "MIT",
+  "license": "ROOT",
   "devDependencies": {
     "@types/node": "^22.19.3",
     "eslint": "^9.39.2",
