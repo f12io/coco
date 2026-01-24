@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.4] - 2026-01-24
+
+- Updated license to ROOT.
+- Updated package-lock.json.
+
 ## [2.1.3] - 2025-12-17
 
 - Moved to F12 organization.
