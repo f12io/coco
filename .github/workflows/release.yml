@@ -1,0 +1,227 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v[0-9]*'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-release-tag:
+    name: Validate Release Tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag, branch, and package versions
+        id: validate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${GITHUB_REF_NAME}"
+
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid release tag: $tag"
+            exit 1
+          fi
+
+          git fetch origin main --tags --force
+
+          tag_commit="$(git rev-list -n 1 "$tag")"
+          main_head="$(git rev-parse origin/main)"
+
+          if [ "$tag_commit" != "$main_head" ]; then
+            echo "Tag $tag must point to the current origin/main HEAD"
+            echo "Tag commit:  $tag_commit"
+            echo "Main HEAD:   $main_head"
+            exit 1
+          fi
+
+          latest_tag="$(
+            git tag --merged origin/main --list 'v[0-9]*' --sort=-v:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$' |
+            head -n 1
+          )"
+
+          if [ "$tag" != "$latest_tag" ]; then
+            echo "Tag $tag is not the latest main tag. Latest is $latest_tag"
+            exit 1
+          fi
+
+          tag_version="${tag#v}"
+          package_version="$(node -p "require('./package.json').version")"
+          lock_version="$(node -p "require('./package-lock.json').version")"
+          lock_root_version="$(node -p "require('./package-lock.json').packages[''].version")"
+
+          if [ "$tag_version" != "$package_version" ]; then
+            echo "Tag version $tag_version does not match package.json version $package_version"
+            exit 1
+          fi
+
+          if [ "$package_version" != "$lock_version" ]; then
+            echo "package.json version $package_version does not match package-lock.json version $lock_version"
+            exit 1
+          fi
+
+          if [ "$package_version" != "$lock_root_version" ]; then
+            echo "package.json version $package_version does not match package-lock root package version $lock_root_version"
+            exit 1
+          fi
+
+          echo "version=$package_version" >> "$GITHUB_OUTPUT"
+
+  build-and-test:
+    name: Build & Test
+    needs: validate-release-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Verify Artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          artifacts=(
+            dist/f12io-coco.js
+            dist/f12io-coco.umd.cjs
+            dist/f12io-coco.cjs
+            dist/f12io-coco.d.ts
+          )
+
+          for artifact in "${artifacts[@]}"; do
+            test -s "$artifact"
+            ls -lh "$artifact"
+          done
+
+      - name: Upload Distribution Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: dist
+          path: dist/
+
+  create-github-release:
+    name: Create Draft GitHub Release
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: dist
+          path: dist
+
+      - name: Create Draft Release & Upload Assets
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          files: |
+            dist/f12io-coco.js
+            dist/f12io-coco.umd.cjs
+            dist/f12io-coco.cjs
+            dist/f12io-coco.d.ts
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+
+  publish-npm:
+    name: Publish to NPM
+    needs: create-github-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: dist
+          path: dist
+
+      - name: Verify Package Contents
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          npm pack --dry-run
+
+          node --input-type=module <<'NODE'
+          import { existsSync, statSync } from 'node:fs';
+
+          const requiredFiles = [
+            'dist/f12io-coco.js',
+            'dist/f12io-coco.umd.cjs',
+            'dist/f12io-coco.cjs',
+            'dist/f12io-coco.d.ts',
+          ];
+
+          for (const file of requiredFiles) {
+            if (!existsSync(file) || statSync(file).size === 0) {
+              throw new Error(`Missing or empty package file: ${file}`);
+            }
+          }
+          NODE
+
+      - name: Publish Package
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            TAG_NAME=$(echo "$GITHUB_REF_NAME" | awk -F'-' '{print $2}' | awk -F'.' '{print $1}')
+            if [ -z "$TAG_NAME" ]; then
+              TAG_NAME="next"
+            fi
+            npm publish --access public --tag "$TAG_NAME"
+          else
+            npm publish --access public
+          fi
+
+  publish-github-release:
+    name: Publish GitHub Release
+    needs: publish-npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish Draft Release
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+        env:
+          GH_TOKEN: ${{ github.token }}
