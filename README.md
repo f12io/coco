@@ -127,4 +127,4 @@ If both `nameResolver` and `namedColors` are provided, `nameResolver` takes prec
 
 ## License
 
-MIT Copyright (c) 2015-2025
+Released under the [Root Source License (ROOT)](https://github.com/f12io/coco/blob/main/LICENSE), an MIT-style permissive license with an additional distribution condition for systems that can recreate the source on demand. © [f12.io](https://f12.io)
