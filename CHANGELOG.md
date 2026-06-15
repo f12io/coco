@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.1.5] - 2026-06-16
+
+### Added
+
+- Migrated contributing docs and added release and issue management workflows.
+
+### Updated
+
+- Updated license information and attribution in README.
+- Bumped dependencies to latest versions.
+
+### Fixed
+
+- Removed `burntsienna` from named colors list.
+
 ## [2.1.4] - 2026-01-24
 
 - Updated license to ROOT.
