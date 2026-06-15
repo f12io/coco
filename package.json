@@ -19,7 +19,8 @@
     "coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.{ts,js,json}\"",
-    "prepublishOnly": "npm run build"
+    "preversion": "tsx scripts/preversion-check.ts && npm run lint && npm run test && npm run build",
+    "release": "tsx scripts/release.ts"
   },
   "homepage": "https://github.com/f12io/coco",
   "keywords": [
