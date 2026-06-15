@@ -12,7 +12,6 @@ export const namedColors: Record<string, string> = {
   blueviolet: "8a2be2",
   brown: "a52a2a",
   burlywood: "deb887",
-  burntsienna: "ea7e5d",
   cadetblue: "5f9ea0",
   chartreuse: "7fff00",
   chocolate: "d2691e",
