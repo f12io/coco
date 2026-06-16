@@ -15,7 +15,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "lint": "eslint src",
     "format": "prettier --write \"src/**/*.{ts,js,json}\"",
