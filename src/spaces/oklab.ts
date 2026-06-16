@@ -7,23 +7,23 @@ import {
   OKLAB_M2,
   OKLAB_M2_INV,
   Vector3,
-} from "../core/math";
-import { ColorObject, ParseResult } from "../core/types";
-import { clampAlpha, getPrecision, smartQuantize } from "../core/utils";
+} from '../core/math';
+import { ColorObject, ParseResult } from '../core/types';
+import { clampAlpha, getPrecision, smartQuantize } from '../core/utils';
 
 const R_OKLAB =
-  /^oklab\(\s*([-+]?[\d\.]+)%?\s+([-+]?[\d\.]+)\s+([-+]?[\d\.]+)(?:\s*\/\s*([-+]?[\d\.]+)%?)?\s*\)$/i;
+  /^oklab\(\s*([-+]?[\d.]+)%?\s+([-+]?[\d.]+)%?\s+([-+]?[\d.]+)%?(?:\s*\/\s*([-+]?[\d.]+)%?)?\s*\)$/i;
 
 export function parseOklab(input: string): ParseResult {
-  const match = input.match(R_OKLAB);
+  const match = R_OKLAB.exec(input);
   if (!match) return undefined;
 
-  const [_, l, a, b, alpha] = match;
+  const [, l, a, b, alpha] = match;
   let L = parseFloat(l);
-  if (match[1].endsWith("%")) L /= 100;
+  if (match[1].endsWith('%')) L /= 100;
 
   return {
-    space: "oklab",
+    space: 'oklab',
     coords: [L, parseFloat(a), parseFloat(b)],
     alpha: alpha ? clampAlpha(parseFloat(alpha)) : 1,
     meta: { precision: getPrecision(input) },
@@ -34,11 +34,7 @@ export function serializeOklab(color: ColorObject): string {
   const prec = color.meta?.precision ?? 3;
   const Alpha = Math.round(color.alpha * 1000) / 1000;
 
-  const [L, A, B] = smartQuantize(
-    color.coords as [number, number, number],
-    prec,
-    getRgb
-  );
+  const [L, A, B] = smartQuantize(color.coords, prec, getRgb);
 
   if (Alpha < 1) {
     return `oklab(${L} ${A} ${B} / ${Alpha})`;
@@ -64,7 +60,7 @@ export function oklabToRgb(color: ColorObject): ColorObject {
   const srgb = gam_sRGB(snappedLin);
 
   return {
-    space: "rgb",
+    space: 'rgb',
     coords: srgb,
     alpha: alpha,
   };
@@ -79,7 +75,7 @@ export function rgbToOklab(color: ColorObject): ColorObject {
   const lab = mul3x3(OKLAB_M2, lms_hat);
 
   return {
-    space: "oklab",
+    space: 'oklab',
     coords: lab,
     alpha: color.alpha,
   };
@@ -87,7 +83,7 @@ export function rgbToOklab(color: ColorObject): ColorObject {
 
 function getRgb(l: number, a: number, b: number) {
   return oklabToRgb({
-    space: "oklab",
+    space: 'oklab',
     coords: [l, a, b],
     alpha: 1,
   }).coords.map((v) => Math.round(v));

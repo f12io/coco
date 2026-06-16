@@ -7,27 +7,27 @@ import {
   OKLAB_M2,
   OKLAB_M2_INV,
   Vector3,
-} from "../core/math";
-import { ColorObject, ParseResult } from "../core/types";
-import { clampAlpha, getPrecision, smartQuantize } from "../core/utils";
+} from '../core/math';
+import { ColorObject, ParseResult } from '../core/types';
+import { clampAlpha, getPrecision, smartQuantize } from '../core/utils';
 
 const R_OKLCH =
-  /^oklch\(\s*([^\s\/,]+)[\s,]+([^\s\/,]+)[\s,]+([^\s\/,]+)(?:[\s\/,]+([^\s\)]+))?\s*\)$/i;
+  /^oklch\(\s*([^\s/,]+)[\s,]+([^\s/,]+)[\s,]+([^\s/,]+)(?:[\s/,]+([^\s)]+))?\s*\)$/i;
 
 export function parseOklch(input: string): ParseResult {
-  const match = input.match(R_OKLCH);
+  const match = R_OKLCH.exec(input);
   if (!match) return undefined;
 
   let l = parseFloat(match[1]);
-  if (match[1].endsWith("%")) l /= 100;
+  if (match[1].endsWith('%')) l /= 100;
 
   let c = parseFloat(match[2]);
-  if (match[2].endsWith("%")) c = (c / 100) * 0.4;
+  if (match[2].endsWith('%')) c = (c / 100) * 0.4;
 
   let h = parseFloat(match[3]);
-  if (match[3].endsWith("rad")) h = (h * 180) / Math.PI;
-  else if (match[3].endsWith("grad")) h = h * 0.9;
-  else if (match[3].endsWith("turn")) h = h * 360;
+  if (match[3].endsWith('rad')) h = (h * 180) / Math.PI;
+  else if (match[3].endsWith('grad')) h = h * 0.9;
+  else if (match[3].endsWith('turn')) h = h * 360;
 
   h = h % 360;
   if (h < 0) h += 360;
@@ -36,11 +36,11 @@ export function parseOklch(input: string): ParseResult {
   let a = 1;
   if (aStr) {
     a = parseFloat(aStr);
-    if (aStr.endsWith("%")) a /= 100;
+    if (aStr.endsWith('%')) a /= 100;
   }
 
   return {
-    space: "oklch",
+    space: 'oklch',
     coords: [l, c, h],
     alpha: clampAlpha(a),
     meta: { precision: getPrecision(input) },
@@ -51,11 +51,7 @@ export function serializeOklch(color: ColorObject): string {
   const prec = color.meta?.precision ?? 3;
   const Alpha = Math.round(color.alpha * 1000) / 1000;
 
-  const [L, C, H] = smartQuantize(
-    color.coords as [number, number, number],
-    prec,
-    getRgb
-  );
+  const [L, C, H] = smartQuantize(color.coords, prec, getRgb);
 
   if (Alpha < 1) {
     return `oklch(${L} ${C} ${H} / ${Alpha})`;
@@ -87,7 +83,7 @@ export function oklchToRgb(color: ColorObject): ColorObject {
   const srgb = gam_sRGB(snappedLin);
 
   return {
-    space: "rgb",
+    space: 'rgb',
     coords: srgb,
     alpha: a,
   };
@@ -111,7 +107,7 @@ export function rgbToOklch(color: ColorObject): ColorObject {
   }
 
   return {
-    space: "oklch",
+    space: 'oklch',
     coords: [L, Chroma, Hue],
     alpha: color.alpha,
   };
@@ -119,7 +115,7 @@ export function rgbToOklch(color: ColorObject): ColorObject {
 
 function getRgb(l: number, c: number, h: number) {
   return oklchToRgb({
-    space: "oklch",
+    space: 'oklch',
     coords: [l, c, h],
     alpha: 1,
   }).coords.map((v) => Math.round(v));

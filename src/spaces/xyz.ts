@@ -4,20 +4,20 @@ import {
   gam_sRGB,
   lin_sRGB,
   mul3x3,
-} from "../core/math";
-import { ColorObject, ParseResult } from "../core/types";
-import { clampAlpha, getPrecision } from "../core/utils";
+} from '../core/math';
+import { ColorObject, ParseResult } from '../core/types';
+import { clampAlpha, getPrecision } from '../core/utils';
 
 const R_XYZ =
-  /^color\(xyz\s+([-+]?[\d\.]+)\s+([-+]?[\d\.]+)\s+([-+]?[\d\.]+)(?:\s*\/\s*([-+]?[\d\.]+)%?)?\)$/i;
+  /^color\(xyz\s+([-+]?[\d.]+)\s+([-+]?[\d.]+)\s+([-+]?[\d.]+)(?:\s*\/\s*([-+]?[\d.]+)%?)?\)$/i;
 
 export function parseXyz(input: string): ParseResult {
-  const match = input.match(R_XYZ);
+  const match = R_XYZ.exec(input);
   if (!match) return undefined;
 
-  const [_, x, y, z, a] = match;
+  const [, x, y, z, a] = match;
   return {
-    space: "xyz",
+    space: 'xyz',
     coords: [parseFloat(x), parseFloat(y), parseFloat(z)],
     alpha: a ? clampAlpha(parseFloat(a)) : 1,
     meta: { precision: getPrecision(input) },
@@ -38,7 +38,7 @@ export function serializeXyz(color: ColorObject): string {
 
 export function xyzToRgb(color: ColorObject): ColorObject {
   const xyz = color.coords;
-  const linRGB = mul3x3(M_XYZ_D65_TO_SRGB, xyz as [number, number, number]);
+  const linRGB = mul3x3(M_XYZ_D65_TO_SRGB, xyz);
   const snappedLin = linRGB.map((v) => {
     if (Math.abs(v) < 0.0001) return 0;
     if (Math.abs(v - 1) < 0.0001) return 1;
@@ -46,7 +46,7 @@ export function xyzToRgb(color: ColorObject): ColorObject {
   }) as [number, number, number];
   const sRGB = gam_sRGB(snappedLin);
   return {
-    space: "rgb",
+    space: 'rgb',
     coords: sRGB,
     alpha: color.alpha,
   };
@@ -56,7 +56,7 @@ export function rgbToXyz(color: ColorObject): ColorObject {
   const linRGB = lin_sRGB(color.coords);
   const xyz = mul3x3(M_SRGB_TO_XYZ_D65, linRGB);
   return {
-    space: "xyz",
+    space: 'xyz',
     coords: xyz,
     alpha: color.alpha,
   };

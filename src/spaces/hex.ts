@@ -1,4 +1,4 @@
-import { ColorObject, ParseResult } from "../core/types";
+import { ColorObject, ParseResult } from '../core/types';
 
 const R_HEX3 = /^[0-9a-f]{3}$/i;
 const R_HEX4 = /^[0-9a-f]{4}$/i;
@@ -6,14 +6,14 @@ const R_HEX6 = /^[0-9a-f]{6}$/i;
 const R_HEX8 = /^[0-9a-f]{8}$/i;
 
 export function parseHex(input: string): ParseResult | undefined {
-  if (!input.startsWith("#")) {
+  if (!input.startsWith('#')) {
     return undefined;
   }
 
   const hex = input.slice(1);
-  if (hex.match(R_HEX3)) {
+  if (R_HEX3.exec(hex)) {
     return {
-      space: "rgb",
+      space: 'rgb',
       coords: [
         parseInt(hex[0] + hex[0], 16),
         parseInt(hex[1] + hex[1], 16),
@@ -22,9 +22,9 @@ export function parseHex(input: string): ParseResult | undefined {
       alpha: 1,
     };
   }
-  if (hex.match(R_HEX4)) {
+  if (R_HEX4.exec(hex)) {
     return {
-      space: "rgb",
+      space: 'rgb',
       coords: [
         parseInt(hex[0] + hex[0], 16),
         parseInt(hex[1] + hex[1], 16),
@@ -33,9 +33,9 @@ export function parseHex(input: string): ParseResult | undefined {
       alpha: parseInt(hex[3] + hex[3], 16) / 255,
     };
   }
-  if (hex.match(R_HEX6)) {
+  if (R_HEX6.exec(hex)) {
     return {
-      space: "rgb",
+      space: 'rgb',
       coords: [
         parseInt(hex.slice(0, 2), 16),
         parseInt(hex.slice(2, 4), 16),
@@ -44,9 +44,9 @@ export function parseHex(input: string): ParseResult | undefined {
       alpha: 1,
     };
   }
-  if (hex.match(R_HEX8)) {
+  if (R_HEX8.exec(hex)) {
     return {
-      space: "rgb",
+      space: 'rgb',
       coords: [
         parseInt(hex.slice(0, 2), 16),
         parseInt(hex.slice(2, 4), 16),
@@ -62,9 +62,9 @@ export function parseHex(input: string): ParseResult | undefined {
 export function serializeHex8(color: ColorObject): string {
   const { coords, alpha } = color;
   const [r, g, b] = coords.map((c) =>
-    Math.round(Math.max(0, Math.min(255, c)))
+    Math.round(Math.max(0, Math.min(255, c))),
   );
-  const toHex = (n: number) => n.toString(16).padStart(2, "0");
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
   const a = Math.round(Math.max(0, Math.min(1, alpha)) * 255);
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(a)}`;
@@ -73,9 +73,9 @@ export function serializeHex8(color: ColorObject): string {
 export function serializeHex6(color: ColorObject): string {
   const { coords } = color;
   const [r, g, b] = coords.map((c) =>
-    Math.round(Math.max(0, Math.min(255, c)))
+    Math.round(Math.max(0, Math.min(255, c))),
   );
-  const toHex = (n: number) => n.toString(16).padStart(2, "0");
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
@@ -113,10 +113,10 @@ export function serializeHex(color: ColorObject): string {
 export function serializeHexLong(color: ColorObject): string {
   const { coords, alpha } = color;
   const [r, g, b] = coords.map((c) =>
-    Math.round(Math.max(0, Math.min(255, c)))
+    Math.round(Math.max(0, Math.min(255, c))),
   );
 
-  const toHex = (n: number) => n.toString(16).padStart(2, "0");
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
 
   if (alpha < 1) {
     const a = Math.round(Math.max(0, Math.min(1, alpha)) * 255);

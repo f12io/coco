@@ -1,8 +1,8 @@
-import { ColorObject, ParseResult } from "../core/types";
-import { clampAlpha, clampRgb, R_DECIMAL, snapToInt } from "../core/utils";
+import { ColorObject, ParseResult } from '../core/types';
+import { clampAlpha, clampRgb, R_DECIMAL, snapToInt } from '../core/utils';
 
 const R_HSL =
-  /^hsla?\(\s*([-+]?[\d\.]+)(deg|rad|grad|turn)?\s*[,\s]\s*([-+]?[\d\.]+)%\s*[,\s]\s*([-+]?[\d\.]+)%\s*(?:[,\/]\s*([-+]?[\d\.]+)(%)?)?\s*\)$/i;
+  /^hsla?\(\s*([-+]?[\d.]+)(deg|rad|grad|turn)?\s*[,\s]\s*([-+]?[\d.]+)%\s*[,\s]\s*([-+]?[\d.]+)%\s*(?:[,/]\s*([-+]?[\d.]+)(%)?)?\s*\)$/i;
 
 export function parseHsl(input: string): ParseResult {
   return parseHslRefined(input);
@@ -10,7 +10,7 @@ export function parseHsl(input: string): ParseResult {
 
 // Better parser needed for Alpha %
 function parseHslRefined(input: string): ParseResult {
-  const match = input.match(R_HSL);
+  const match = R_HSL.exec(input);
   if (!match) return undefined;
 
   let h = parseFloat(match[1]);
@@ -21,27 +21,27 @@ function parseHslRefined(input: string): ParseResult {
 
   if (match[5]) {
     a = parseFloat(match[5]);
-    if (match[6] === "%") a /= 100;
+    if (match[6] === '%') a /= 100;
   }
 
   // Normalize hue
-  if (hUnit === "rad") h = (h * 180) / Math.PI;
-  else if (hUnit === "grad") h = h * 0.9;
-  else if (hUnit === "turn") h = h * 360;
+  if (hUnit === 'rad') h = (h * 180) / Math.PI;
+  else if (hUnit === 'grad') h = h * 0.9;
+  else if (hUnit === 'turn') h = h * 360;
 
   // Normalize negative hues
   h = h % 360;
   if (h < 0) h += 360;
 
   // Detect max precision from input
-  const decimalMatches = input.match(R_DECIMAL) || [];
+  const decimalMatches = input.match(R_DECIMAL) ?? [];
   const precision =
     decimalMatches.length > 0
       ? Math.max(...decimalMatches.map((m) => m.length - 1))
       : 0;
 
   return {
-    space: "hsl",
+    space: 'hsl',
     coords: [h, Math.min(100, Math.max(0, s)), Math.min(100, Math.max(0, l))],
     alpha: clampAlpha(a),
     meta: { precision },
@@ -109,7 +109,7 @@ export function hslToRgb(color: ColorObject): ColorObject {
   const B = snapToInt(clampRgb((b + m) * 255));
 
   return {
-    space: "rgb",
+    space: 'rgb',
     coords: [R, G, B],
     alpha: a,
   };
@@ -146,7 +146,7 @@ export function rgbToHsl(color: ColorObject): ColorObject {
   }
 
   return {
-    space: "hsl",
+    space: 'hsl',
     coords: [h, s * 100, l * 100],
     alpha: color.alpha,
   };

@@ -1,15 +1,15 @@
-import { ColorObject, ParseResult } from "../core/types";
+import { ColorObject, ParseResult } from '../core/types';
 
 const R_RGB_COMMA =
-  /^rgba?\(\s*([-+]?[\d\.]+)(%?)\s*,\s*([-+]?[\d\.]+)(%?)\s*,\s*([-+]?[\d\.]+)(%?)\s*(?:,\s*([-+]?[\d\.]+)(\%?))?\s*\)$/i;
+  /^rgba?\(\s*([-+]?[\d.]+)(%?)\s*,\s*([-+]?[\d.]+)(%?)\s*,\s*([-+]?[\d.]+)(%?)\s*(?:,\s*([-+]?[\d.]+)(%?))?\s*\)$/i;
 const R_RGB_SPACE =
-  /^rgba?\(\s*([-+]?[\d\.]+)(%?)\s+([-+]?[\d\.]+)(%?)\s+([-+]?[\d\.]+)(%?)\s*(?:\/\s*([-+]?[\d\.]+)(\%?))?\s*\)$/i;
+  /^rgba?\(\s*([-+]?[\d.]+)(%?)\s+([-+]?[\d.]+)(%?)\s+([-+]?[\d.]+)(%?)\s*(?:\/\s*([-+]?[\d.]+)(%?))?\s*\)$/i;
 
 export function parseRgb(input: string): ParseResult {
-  const match = input.match(R_RGB_COMMA);
+  const match = R_RGB_COMMA.exec(input);
   if (!match) {
     // Try space separated syntax (CSS4)
-    const match4 = input.match(R_RGB_SPACE);
+    const match4 = R_RGB_SPACE.exec(input);
     if (match4) return parseMatch(match4);
     return undefined;
   }
@@ -23,7 +23,7 @@ function parseMatch(match: RegExpMatchArray): ColorObject {
   const a = match[7] ? parseValue(match[7], match[8], 1) : 1;
 
   return {
-    space: "rgb",
+    space: 'rgb',
     coords: [r, g, b],
     alpha: a,
   };
@@ -31,7 +31,7 @@ function parseMatch(match: RegExpMatchArray): ColorObject {
 
 function parseValue(val: string, unit: string, max: number): number {
   let num = parseFloat(val);
-  if (unit === "%") {
+  if (unit === '%') {
     num = (num / 100) * max;
   }
   return Math.min(Math.max(num, 0), max);

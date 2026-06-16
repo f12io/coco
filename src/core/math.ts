@@ -1,6 +1,7 @@
+/* eslint-disable no-loss-of-precision */
 export type Vector3 = [number, number, number];
 
-export function mul3x3(m: number[][], v: Vector3): Vector3 {
+export function mul3x3(m: Array<Array<number>>, v: Vector3): Vector3 {
   return [
     m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
     m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],

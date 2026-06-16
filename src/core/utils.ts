@@ -1,8 +1,8 @@
 export const R_DECIMAL = /\.\d+/g;
 
 export function getPrecision(input: string): number {
-  return (input.match(R_DECIMAL) || []).length > 0
-    ? Math.max(...(input.match(R_DECIMAL) || []).map((m) => m.length - 1))
+  return (input.match(R_DECIMAL) ?? []).length > 0
+    ? Math.max(...(input.match(R_DECIMAL) ?? []).map((m) => m.length - 1))
     : 0;
 }
 
@@ -20,16 +20,16 @@ export function snapToInt(v: number): number {
 }
 
 export function normalizeHex(hex: string): string {
-  const normalized = hex.toLowerCase().replace("#", "");
+  const normalized = hex.toLowerCase().replace('#', '');
 
   if (normalized.length === 3 || normalized.length === 4) {
     return normalized
-      .split("")
+      .split('')
       .map((c) => c + c)
-      .join("");
+      .join('');
   }
 
-  if (normalized.length === 8 && normalized.endsWith("ff")) {
+  if (normalized.length === 8 && normalized.endsWith('ff')) {
     return normalized.slice(0, 6);
   }
 
@@ -37,20 +37,20 @@ export function normalizeHex(hex: string): string {
 }
 
 export function reverseNamedColors(
-  namedColors: Record<string, string>
+  namedColors: Record<string, string>,
 ): Record<string, string> {
   return Object.fromEntries(
     Object.entries(namedColors).map(([key, value]) => [
       normalizeHex(value),
       key,
-    ])
+    ]),
   );
 }
 
 export function smartQuantize(
   coords: [number, number, number],
   prec: number,
-  getRgb: (c1: number, c2: number, c3: number) => number[]
+  getRgb: (c1: number, c2: number, c3: number) => Array<number>,
 ): [number, number, number] {
   const [c1, c2, c3] = coords;
   const factor = Math.pow(10, prec);

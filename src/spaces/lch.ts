@@ -1,25 +1,25 @@
-import { ColorObject, ParseResult } from "../core/types";
-import { clampAlpha, getPrecision } from "../core/utils";
-import { labToRgb, rgbToLab } from "./lab";
+import { ColorObject, ParseResult } from '../core/types';
+import { clampAlpha, getPrecision } from '../core/utils';
+import { labToRgb, rgbToLab } from './lab';
 
 const R_LCH =
-  /^lch\(\s*([-+]?[\d\.]+)%?\s+([-+]?[\d\.]+)\s+([-+]?[\d\.]+)(deg|rad|grad|turn)?\s*(?:\/\s*([-+]?[\d\.]+)%?)?\s*\)$/i;
+  /^lch\(\s*([-+]?[\d.]+)%?\s+([-+]?[\d.]+)%?\s+([-+]?[\d.]+)%?(deg|rad|grad|turn)?\s*(?:\/\s*([-+]?[\d.]+)%?)?\s*\)$/i;
 
 export function parseLch(input: string): ParseResult {
-  const match = input.match(R_LCH);
+  const match = R_LCH.exec(input);
   if (!match) return undefined;
 
-  const [_, l, c, hStr, unit, alpha] = match;
+  const [, l, c, hStr, unit, alpha] = match;
   let h = parseFloat(hStr);
-  if (unit === "rad") h = (h * 180) / Math.PI;
-  else if (unit === "grad") h = h * 0.9;
-  else if (unit === "turn") h = h * 360;
+  if (unit === 'rad') h = (h * 180) / Math.PI;
+  else if (unit === 'grad') h = h * 0.9;
+  else if (unit === 'turn') h = h * 360;
 
   h = h % 360;
   if (h < 0) h += 360;
 
   return {
-    space: "lch",
+    space: 'lch',
     coords: [parseFloat(l), parseFloat(c), h],
     alpha: alpha ? clampAlpha(parseFloat(alpha)) : 1,
     meta: { precision: getPrecision(input) },
@@ -48,7 +48,7 @@ export function lchToRgb(color: ColorObject): ColorObject {
   const b = c * Math.sin(hRad);
 
   return labToRgb({
-    space: "lab",
+    space: 'lab',
     coords: [l, a, b],
     alpha: color.alpha,
   });
@@ -68,7 +68,7 @@ export function rgbToLch(color: ColorObject): ColorObject {
   }
 
   return {
-    space: "lch",
+    space: 'lch',
     coords: [l, c, h],
     alpha: color.alpha,
   };

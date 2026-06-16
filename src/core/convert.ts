@@ -46,7 +46,7 @@ const SUPPORTED_FORMATS: Array<ColorType> = [
 export function convert(
   color: ColorObject,
   targetType: ColorType,
-  config: CocoConfig = {}
+  config: CocoConfig = {},
 ): ColorObject {
   if (color.space === targetType) return color;
 
@@ -118,7 +118,7 @@ export function convert(
 
 export function convertToAll(
   input: string | undefined,
-  config: CocoConfig
+  config: CocoConfig,
 ): Partial<Record<ColorType, string>> {
   const result: Partial<Record<ColorType, string>> = {};
 
@@ -134,7 +134,7 @@ export function convertToAll(
       if (val && val !== input) {
         result[fmt] = val;
       }
-    } catch (e) {
+    } catch (ignoreError) {
       // ignore
     }
   });
@@ -163,7 +163,7 @@ function toRgbInternal(color: ColorObject): ColorObject {
 
 export function parse(
   input: string | undefined,
-  { namedColors, nameResolver }: CocoConfig = {}
+  { namedColors, nameResolver }: CocoConfig = {},
 ): ParseResult | undefined {
   if (!input) {
     return undefined;
@@ -212,7 +212,7 @@ export function parse(
 
 export function serialize(
   color: ColorObject,
-  format: ColorType
+  format: ColorType,
 ): string | undefined {
   if (format === "hex") return serializeHex(color);
   if (format === "hex3") return serializeHex3(color);
@@ -227,6 +227,7 @@ export function serialize(
   if (format === "lab") return serializeLab(color);
   if (format === "lch") return serializeLch(color);
   if (format === "oklab") return serializeOklab(color);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (format === "name") return color.meta?.name;
 
   return serializeHex(color);

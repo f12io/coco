@@ -1,11 +1,11 @@
-import { ColorObject, ParseResult } from "../core/types";
-import { clampAlpha, clampRgb, R_DECIMAL, snapToInt } from "../core/utils";
+import { ColorObject, ParseResult } from '../core/types';
+import { clampAlpha, clampRgb, R_DECIMAL, snapToInt } from '../core/utils';
 
 const R_HSV =
-  /^hsva?\(\s*([-+]?[\d\.]+)(deg|rad|grad|turn)?\s*[,\s]\s*([-+]?[\d\.]+)%?\s*[,\s]\s*([-+]?[\d\.]+)%?\s*(?:[,\/]\s*([-+]?[\d\.]+)(%)?)?\s*\)$/i;
+  /^hsva?\(\s*([-+]?[\d.]+)(deg|rad|grad|turn)?\s*[,\s]\s*([-+]?[\d.]+)%?\s*[,\s]\s*([-+]?[\d.]+)%?\s*(?:[,/]\s*([-+]?[\d.]+)(%)?)?\s*\)$/i;
 
 export function parseHsv(input: string): ParseResult {
-  const match = input.match(R_HSV);
+  const match = R_HSV.exec(input);
   if (!match) return undefined;
 
   let h = parseFloat(match[1]);
@@ -16,26 +16,26 @@ export function parseHsv(input: string): ParseResult {
 
   if (match[5]) {
     a = parseFloat(match[5]);
-    if (match[6] === "%") a /= 100;
+    if (match[6] === '%') a /= 100;
   }
 
   // Normalize hue
-  if (hUnit === "rad") h = (h * 180) / Math.PI;
-  else if (hUnit === "grad") h = h * 0.9;
-  else if (hUnit === "turn") h = h * 360;
+  if (hUnit === 'rad') h = (h * 180) / Math.PI;
+  else if (hUnit === 'grad') h = h * 0.9;
+  else if (hUnit === 'turn') h = h * 360;
 
   h = h % 360;
   if (h < 0) h += 360;
 
   // Detect max precision from input
-  const decimalMatches = input.match(R_DECIMAL) || [];
+  const decimalMatches = input.match(R_DECIMAL) ?? [];
   const precision =
     decimalMatches.length > 0
       ? Math.max(...decimalMatches.map((m) => m.length - 1))
       : 0;
 
   return {
-    space: "hsv",
+    space: 'hsv',
     coords: [h, Math.min(100, Math.max(0, s)), Math.min(100, Math.max(0, v))],
     alpha: clampAlpha(a),
     meta: { precision },
@@ -106,7 +106,7 @@ export function hsvToRgb(color: ColorObject): ColorObject {
   const B = snapToInt(clampRgb((b + m) * 255));
 
   return {
-    space: "rgb",
+    space: 'rgb',
     coords: [R, G, B],
     alpha: a,
   };
@@ -143,7 +143,7 @@ export function rgbToHsv(color: ColorObject): ColorObject {
   }
 
   return {
-    space: "hsv",
+    space: 'hsv',
     coords: [h, s * 100, v * 100],
     alpha: color.alpha,
   };
