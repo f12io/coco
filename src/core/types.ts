@@ -1,18 +1,18 @@
 export type ColorType =
-  | "name"
-  | "rgb"
-  | "hsl"
-  | "hsv"
-  | "hex"
-  | "hex3"
-  | "hex4"
-  | "hex6"
-  | "hex8"
-  | "oklch"
-  | "oklab"
-  | "lch"
-  | "lab"
-  | "xyz";
+  | 'name'
+  | 'rgb'
+  | 'hsl'
+  | 'hsv'
+  | 'hex'
+  | 'hex3'
+  | 'hex4'
+  | 'hex6'
+  | 'hex8'
+  | 'oklch'
+  | 'oklab'
+  | 'lch'
+  | 'lab'
+  | 'xyz';
 
 export type ParseResult = ColorObject | undefined;
 export type NameResolver = (name: string) => string | undefined;
@@ -29,13 +29,9 @@ export interface ColorObject {
   };
 }
 
-export interface ColorParser {
-  (input: string): ParseResult;
-}
+export type ColorParser = (input: string) => ParseResult;
 
-export interface ColorSerializer {
-  (color: ColorObject): string;
-}
+export type ColorSerializer = (color: ColorObject) => string;
 
 export interface CocoConfig {
   nameResolver?: NameResolver;
@@ -47,16 +43,15 @@ export interface CocoConfig {
 export interface CocoInstance {
   (
     color: string | undefined,
-    targetFormat: "all"
+    targetFormat: 'all',
   ): Record<string, string> | undefined;
-  (color: string | undefined, targetFormat: ColorType): string | undefined;
-  (color: string | undefined): string | undefined;
+  (color: string | undefined, targetFormat?: ColorType): string | undefined;
   isColor(input: string | undefined): boolean;
   getType(input: string | undefined): ColorType | undefined;
   getAlpha(input: string | undefined): number | undefined;
   setAlpha(
     input: string | undefined,
-    alpha: number | undefined
+    alpha: number | undefined,
   ): string | undefined;
   removeAlpha(input: string | undefined): string | undefined;
   hasAlpha(input: string | undefined): boolean;
